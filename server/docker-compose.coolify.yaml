@@ -24,7 +24,7 @@ services:
       - coolify
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_started
     command: |
       sh -c '
         python - <<PY
@@ -46,10 +46,17 @@ services:
               time.sleep(2)
       import psycopg
       from psycopg import sql
-      with psycopg.connect(host=host, port=port, dbname=default_db, user=user, password=password, autocommit=True) as conn:
-          exists = conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (app_db,)).fetchone()
-          if not exists:
-              conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(app_db)))
+      while True:
+          try:
+              with psycopg.connect(host=host, port=port, dbname=default_db, user=user, password=password, autocommit=True) as conn:
+                  exists = conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (app_db,)).fetchone()
+                  if not exists:
+                      conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(app_db)))
+                  break
+          except psycopg.OperationalError:
+              if time.time() > deadline:
+                  raise
+              time.sleep(2)
       PY
         (alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000) > /tmp/mem0-startup.log 2>&1 || python - <<PY
       from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -131,12 +138,6 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d \"$${POSTGRES_DB}\" -U \"$${POSTGRES_USER}\""]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 60s
     volumes:
       - postgres_db_pg16:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
