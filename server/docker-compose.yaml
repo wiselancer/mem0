@@ -8,6 +8,16 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mem0-api-http.rule=Host(`mem0-api.petrenko.cv`)
+      - traefik.http.routers.mem0-api-http.entrypoints=http
+      - traefik.http.routers.mem0-api-http.service=mem0-api
+      - traefik.http.routers.mem0-api-https.rule=Host(`mem0-api.petrenko.cv`)
+      - traefik.http.routers.mem0-api-https.entrypoints=https
+      - traefik.http.routers.mem0-api-https.tls=true
+      - traefik.http.routers.mem0-api-https.service=mem0-api
+      - traefik.http.services.mem0-api.loadbalancer.server.port=8000
     networks:
       - mem0_network
     depends_on:
@@ -68,6 +78,16 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mem0-dashboard-http.rule=Host(`mem0.petrenko.cv`)
+      - traefik.http.routers.mem0-dashboard-http.entrypoints=http
+      - traefik.http.routers.mem0-dashboard-http.service=mem0-dashboard
+      - traefik.http.routers.mem0-dashboard-https.rule=Host(`mem0.petrenko.cv`)
+      - traefik.http.routers.mem0-dashboard-https.entrypoints=https
+      - traefik.http.routers.mem0-dashboard-https.tls=true
+      - traefik.http.routers.mem0-dashboard-https.service=mem0-dashboard
+      - traefik.http.services.mem0-dashboard.loadbalancer.server.port=3000
     networks:
       - mem0_network
     environment:
