@@ -138,11 +138,11 @@ services:
       retries: 30
       start_period: 60s
     volumes:
-      - postgres_db:/var/lib/postgresql/data
+      - postgres_db_v2:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
 
 volumes:
-  postgres_db:
+  postgres_db_v2:
 
 networks:
   coolify:
