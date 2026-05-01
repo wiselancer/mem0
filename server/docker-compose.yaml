@@ -13,8 +13,24 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: |
+      sh -c '
+        python - <<PY
+      import os, socket, time
+      host = os.getenv("POSTGRES_HOST", "postgres")
+      port = int(os.getenv("POSTGRES_PORT", "5432"))
+      deadline = time.time() + 180
+      while True:
+          try:
+              with socket.create_connection((host, port), timeout=5):
+                  break
+          except OSError:
+              if time.time() > deadline:
+                  raise
+              time.sleep(2)
+      PY
+        alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000
+      '
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=
@@ -46,7 +62,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
   mem0-dashboard:
     build:
@@ -69,7 +85,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
   postgres:
     image: ankane/pgvector:v0.5.1
@@ -82,10 +98,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -q -d \"$${POSTGRES_DB}\" -U \"$${POSTGRES_USER}\""]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 30
+      start_period: 60s
     volumes:
       - postgres_db:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
