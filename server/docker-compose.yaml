@@ -18,8 +18,10 @@ services:
       - traefik.http.routers.mem0-api-https.tls=true
       - traefik.http.routers.mem0-api-https.service=mem0-api
       - traefik.http.services.mem0-api.loadbalancer.server.port=8000
+      - traefik.docker.network=coolify
     networks:
       - mem0_network
+      - coolify
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,8 +90,10 @@ services:
       - traefik.http.routers.mem0-dashboard-https.tls=true
       - traefik.http.routers.mem0-dashboard-https.service=mem0-dashboard
       - traefik.http.services.mem0-dashboard.loadbalancer.server.port=3000
+      - traefik.docker.network=coolify
     networks:
       - mem0_network
+      - coolify
     environment:
       - NEXT_PUBLIC_API_URL=${API_URL:?}
       - API_INTERNAL_URL=http://mem0:8000
@@ -128,5 +132,7 @@ volumes:
   postgres_db:
 
 networks:
+  coolify:
+    external: true
   mem0_network:
     driver: bridge
