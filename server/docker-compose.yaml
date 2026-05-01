@@ -46,7 +46,7 @@ services:
       - MEM0_DEFAULT_EMBEDDER_MODEL=${MEM0_DEFAULT_EMBEDDER_MODEL:-text-embedding-3-small}
       - MEM0_TELEMETRY=${MEM0_TELEMETRY:-false}
       - REQUEST_LOG_RETENTION_DAYS=${REQUEST_LOG_RETENTION_DAYS:-30}
-  mem0-dashboard:
+  dashboard:
     build:
       context: ./dashboard
       dockerfile: Dockerfile
@@ -55,14 +55,14 @@ services:
       - "3000"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.mem0-dashboard-http.rule=Host(`mem0.petrenko.cv`)
-      - traefik.http.routers.mem0-dashboard-http.entrypoints=http
-      - traefik.http.routers.mem0-dashboard-http.service=mem0-dashboard
-      - traefik.http.routers.mem0-dashboard-https.rule=Host(`mem0.petrenko.cv`)
-      - traefik.http.routers.mem0-dashboard-https.entrypoints=https
-      - traefik.http.routers.mem0-dashboard-https.tls=true
-      - traefik.http.routers.mem0-dashboard-https.service=mem0-dashboard
-      - traefik.http.services.mem0-dashboard.loadbalancer.server.port=3000
+      - traefik.http.routers.mem0-ui-http.rule=Host(`mem0.petrenko.cv`)
+      - traefik.http.routers.mem0-ui-http.entrypoints=http
+      - traefik.http.routers.mem0-ui-http.service=mem0-ui
+      - traefik.http.routers.mem0-ui-https.rule=Host(`mem0.petrenko.cv`)
+      - traefik.http.routers.mem0-ui-https.entrypoints=https
+      - traefik.http.routers.mem0-ui-https.tls=true
+      - traefik.http.routers.mem0-ui-https.service=mem0-ui
+      - traefik.http.services.mem0-ui.loadbalancer.server.port=3000
       - traefik.docker.network=coolify
     networks:
       - mem0_network

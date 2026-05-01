@@ -87,11 +87,8 @@ class SetupStatusResponse(BaseModel):
 
 @router.get("/setup-status", response_model=SetupStatusResponse)
 def setup_status(db: Session = Depends(get_db)):
-    try:
-        count = db.scalar(select(func.count(User.id)))
-        return SetupStatusResponse(needsSetup=count == 0)
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"setup-status failed: {type(exc).__name__}: {exc}") from exc
+    count = db.scalar(select(func.count(User.id)))
+    return SetupStatusResponse(needsSetup=count == 0)
 
 
 @router.post("/register", response_model=TokenResponse)

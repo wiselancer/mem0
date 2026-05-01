@@ -1,28 +1,6 @@
 #!/bin/sh
 set -eu
 
-LOG_FILE=/tmp/mem0-startup.log
-
-serve_error() {
-  python - <<'PY'
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from pathlib import Path
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        body = Path("/tmp/mem0-startup.log").read_text(errors="replace")[-12000:]
-        self.send_response(500)
-        self.send_header("Content-Type", "text/plain; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(body.encode())
-
-
-HTTPServer(("0.0.0.0", 8000), Handler).serve_forever()
-PY
-}
-
-(
 python - <<'PY'
 import os
 import socket
@@ -73,4 +51,3 @@ PY
 
 alembic upgrade head
 exec uvicorn main:app --host 0.0.0.0 --port 8000
-) > "$LOG_FILE" 2>&1 || serve_error
