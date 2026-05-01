@@ -11,7 +11,7 @@ def _build_database_url() -> str:
     user = os.environ.get("POSTGRES_USER", "postgres")
     password = os.environ.get("POSTGRES_PASSWORD", "postgres")
     db = os.environ.get("APP_DB_NAME", "mem0_app")
-    return str(
+    return (
         URL.create(
             "postgresql+psycopg",
             username=user,
@@ -20,6 +20,7 @@ def _build_database_url() -> str:
             port=int(port),
             database=db,
         )
+        .render_as_string(hide_password=False)
     )
 
 
