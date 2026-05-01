@@ -9,7 +9,9 @@ Create a new Docker Compose application:
 - Repository: `https://github.com/wiselancer/mem0`
 - Branch: your pinned deployment branch
 - Base directory: `server`
-- Compose file: `docker-compose.coolify.yaml`
+- Compose file: `docker-compose.yaml`
+
+For local development, use `docker-compose.dev.yaml`.
 
 ## Domains
 
