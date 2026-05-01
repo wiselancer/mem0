@@ -64,6 +64,13 @@ services:
       - traefik.http.routers.mem0-ui-https.service=mem0-ui
       - traefik.http.services.mem0-ui.loadbalancer.server.port=3000
       - traefik.docker.network=coolify
+      - caddy_0=https://mem0.petrenko.cv
+      - caddy_0.encode=zstd gzip
+      - caddy_0.handle_path=/*
+      - caddy_0.handle_path.0_reverse_proxy={{upstreams 3000}}
+      - caddy_0.header=-Server
+      - caddy_0.try_files={path} /index.html /index.php
+      - caddy_ingress_network=yydnbjtfkeb4rxm5jewd28qf
     networks:
       - mem0_network
       - coolify
