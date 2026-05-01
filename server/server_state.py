@@ -80,7 +80,7 @@ def initialize_state(default_config: Dict[str, Any]) -> None:
         overrides = _load_overrides()
         if overrides:
             _current_config = _merge_config(_current_config, overrides)
-        _memory_instance = Memory.from_config(_current_config)
+        _memory_instance = None
 
 
 def update_config(updates: Dict[str, Any]) -> Dict[str, Any]:
@@ -88,7 +88,7 @@ def update_config(updates: Dict[str, Any]) -> Dict[str, Any]:
     with _state_lock:
         next_config = _merge_config(_current_config, updates)
         _current_config = next_config
-        _memory_instance = Memory.from_config(next_config)
+        _memory_instance = None
         overrides = _load_overrides()
         overrides = _merge_config(overrides, updates)
         _save_overrides(overrides)
@@ -101,7 +101,8 @@ def get_current_config() -> Dict[str, Any]:
 
 
 def get_memory_instance() -> Memory:
+    global _memory_instance
     with _state_lock:
         if _memory_instance is None:
-            raise RuntimeError("Mem0 runtime has not been initialized.")
+            _memory_instance = Memory.from_config(_current_config)
         return _memory_instance
