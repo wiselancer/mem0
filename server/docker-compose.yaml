@@ -32,7 +32,7 @@ services:
       host = os.getenv("POSTGRES_HOST", "postgres")
       port = int(os.getenv("POSTGRES_PORT", "5432"))
       user = os.getenv("POSTGRES_USER", "postgres")
-      password = os.getenv("POSTGRES_PASSWORD")
+      password = os.getenv("POSTGRES_PASSWORD", "postgres")
       default_db = os.getenv("POSTGRES_DB", "postgres")
       app_db = os.getenv("APP_DB_NAME", "mem0_app")
       deadline = time.time() + 180
@@ -74,9 +74,8 @@ services:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgres
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_COLLECTION_NAME=${POSTGRES_COLLECTION_NAME:-memories}
       - APP_DB_NAME=mem0_app
       - JWT_SECRET=${JWT_SECRET:?}
@@ -123,15 +122,15 @@ services:
       start_period: 60s
 
   postgres:
-    image: ankane/pgvector:v0.5.1
+    image: pgvector/pgvector:pg16
     restart: unless-stopped
     shm_size: "256mb"
     networks:
       - mem0_network
     environment:
       - POSTGRES_DB=postgres
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -q -d \"$${POSTGRES_DB}\" -U \"$${POSTGRES_USER}\""]
       interval: 10s
@@ -139,11 +138,11 @@ services:
       retries: 30
       start_period: 60s
     volumes:
-      - postgres_db_v6:/var/lib/postgresql/data
+      - postgres_db_pg16:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
 
 volumes:
-  postgres_db_v6:
+  postgres_db_pg16:
 
 networks:
   coolify:
