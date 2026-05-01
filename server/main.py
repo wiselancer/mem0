@@ -172,6 +172,11 @@ app.include_router(entities_router.router)
 app.include_router(requests_router.router)
 
 
+@app.get("/api/health", summary="Health check")
+def health_check():
+    return {"status": "ok"}
+
+
 class Message(BaseModel):
     role: str = Field(..., description="Role of the message (user or assistant).")
     content: str = Field(..., description="Message content.")
