@@ -1,4 +1,5 @@
 import logging
+import re
 import sys
 import uuid
 from contextvars import ContextVar
@@ -10,10 +11,11 @@ request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 
 
 class UpstreamError(HTTPException):
-    def __init__(self, code: str, detail: str, request_id: str) -> None:
+    def __init__(self, code: str, detail: str, request_id: str, debug: str | None = None) -> None:
         super().__init__(status_code=502, detail=detail)
         self.code = code
         self.request_id = request_id
+        self.debug = debug
 
 
 _AUTH_NAMES = {"AuthenticationError", "PermissionDeniedError"}
@@ -73,13 +75,20 @@ def upstream_error() -> UpstreamError:
     code, message = _classify(exc)
     rid = request_id_var.get()
     logging.exception("Upstream provider error (code=%s)", code)
-    return UpstreamError(code=code, detail=message, request_id=rid)
+    debug = None
+    if exc is not None:
+        raw_debug = f"{type(exc).__name__}: {exc}"
+        debug = re.sub(r"(AIza[0-9A-Za-z_-]+|llmapi_[0-9A-Za-z_-]+|sk-[0-9A-Za-z_-]+)", "[redacted]", raw_debug)
+    return UpstreamError(code=code, detail=message, request_id=rid, debug=debug)
 
 
 async def upstream_error_handler(_: Request, exc: UpstreamError) -> JSONResponse:
+    content = {"detail": exc.detail, "code": exc.code, "request_id": exc.request_id}
+    if exc.debug:
+        content["debug"] = exc.debug
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail, "code": exc.code, "request_id": exc.request_id},
+        content=content,
         headers={"X-Request-ID": exc.request_id},
     )
 
