@@ -17,6 +17,7 @@ services:
       - traefik.http.routers.mem0-api-mem-https.rule=Host(`api.mem.petrenko.cv`)
       - traefik.http.routers.mem0-api-mem-https.entrypoints=https
       - traefik.http.routers.mem0-api-mem-https.tls=true
+      - traefik.http.routers.mem0-api-mem-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-api-mem-https.service=mem0-api
       - traefik.http.routers.mem0-api-http.rule=Host(`${MEM0_API_DOMAIN:-mem0-api.petrenko.cv}`)
       - traefik.http.routers.mem0-api-http.entrypoints=http
@@ -24,6 +25,7 @@ services:
       - traefik.http.routers.mem0-api-https.rule=Host(`${MEM0_API_DOMAIN:-mem0-api.petrenko.cv}`)
       - traefik.http.routers.mem0-api-https.entrypoints=https
       - traefik.http.routers.mem0-api-https.tls=true
+      - traefik.http.routers.mem0-api-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-api-https.service=mem0-api
       - traefik.http.services.mem0-api.loadbalancer.server.port=8000
       - traefik.docker.network=coolify
@@ -73,6 +75,7 @@ services:
       - traefik.http.routers.mem0-ui-mem-https.rule=Host(`mem.petrenko.cv`)
       - traefik.http.routers.mem0-ui-mem-https.entrypoints=https
       - traefik.http.routers.mem0-ui-mem-https.tls=true
+      - traefik.http.routers.mem0-ui-mem-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-ui-mem-https.service=mem0-ui
       - traefik.http.routers.mem0-ui-http.rule=Host(`${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}`)
       - traefik.http.routers.mem0-ui-http.entrypoints=http
@@ -80,6 +83,7 @@ services:
       - traefik.http.routers.mem0-ui-https.rule=Host(`${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}`)
       - traefik.http.routers.mem0-ui-https.entrypoints=https
       - traefik.http.routers.mem0-ui-https.tls=true
+      - traefik.http.routers.mem0-ui-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-ui-https.service=mem0-ui
       - traefik.http.services.mem0-ui.loadbalancer.server.port=3000
       - traefik.docker.network=coolify
