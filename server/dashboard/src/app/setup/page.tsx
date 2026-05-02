@@ -18,7 +18,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { getErrorMessage } from "@/lib/error-message";
 import { cn } from "@/lib/utils";
-import { api } from "@/utils/api";
+import { api, getApiBaseUrl } from "@/utils/api";
 import {
   API_KEY_ENDPOINTS,
   AUTH_ENDPOINTS,
@@ -98,7 +98,7 @@ export default function SetupPage() {
   const [isGeneratingInstructions, setIsGeneratingInstructions] =
     useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const apiUrl = getApiBaseUrl();
 
   useEffect(() => {
     if (step !== 1) {
