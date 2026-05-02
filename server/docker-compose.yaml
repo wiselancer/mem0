@@ -10,6 +10,13 @@ services:
       - "8000"
     labels:
       - traefik.enable=true
+      - traefik.http.routers.mem0-api-mem-http.rule=Host(`api.mem.petrenko.cv`)
+      - traefik.http.routers.mem0-api-mem-http.entrypoints=http
+      - traefik.http.routers.mem0-api-mem-http.service=mem0-api
+      - traefik.http.routers.mem0-api-mem-https.rule=Host(`api.mem.petrenko.cv`)
+      - traefik.http.routers.mem0-api-mem-https.entrypoints=https
+      - traefik.http.routers.mem0-api-mem-https.tls=true
+      - traefik.http.routers.mem0-api-mem-https.service=mem0-api
       - traefik.http.routers.mem0-api-http.rule=Host(`${MEM0_API_DOMAIN:-mem0-api.petrenko.cv}`)
       - traefik.http.routers.mem0-api-http.entrypoints=http
       - traefik.http.routers.mem0-api-http.service=mem0-api
@@ -58,6 +65,13 @@ services:
       - "3000"
     labels:
       - traefik.enable=true
+      - traefik.http.routers.mem0-ui-mem-http.rule=Host(`mem.petrenko.cv`)
+      - traefik.http.routers.mem0-ui-mem-http.entrypoints=http
+      - traefik.http.routers.mem0-ui-mem-http.service=mem0-ui
+      - traefik.http.routers.mem0-ui-mem-https.rule=Host(`mem.petrenko.cv`)
+      - traefik.http.routers.mem0-ui-mem-https.entrypoints=https
+      - traefik.http.routers.mem0-ui-mem-https.tls=true
+      - traefik.http.routers.mem0-ui-mem-https.service=mem0-ui
       - traefik.http.routers.mem0-ui-http.rule=Host(`${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}`)
       - traefik.http.routers.mem0-ui-http.entrypoints=http
       - traefik.http.routers.mem0-ui-http.service=mem0-ui
