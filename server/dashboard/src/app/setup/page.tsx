@@ -278,13 +278,9 @@ export default function SetupPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${apiUrl}/memories`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: testMessage }],
-          user_id: "setup-test",
-        }),
+      const res = await fetch(`${apiUrl}/configure`, {
+        method: "GET",
+        headers: { "X-API-Key": apiKey },
       });
 
       if (!res.ok) {
@@ -713,10 +709,8 @@ export default function SetupPage() {
               >
                 <div className="space-y-1">
                   <Label>Test your setup</Label>
-                  <pre className="text-xs bg-surface-default-secondary p-3 rounded font-mono overflow-x-auto">{`curl -X POST ${displayApiUrl}/memories \\
-  -H "X-API-Key: ${apiKey}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"messages": [{"role": "user", "content": "${testMessage}"}], "user_id": "setup-test"}'`}</pre>
+                  <pre className="text-xs bg-surface-default-secondary p-3 rounded font-mono overflow-x-auto">{`curl ${displayApiUrl}/configure \\
+  -H "X-API-Key: ${apiKey}"`}</pre>
                 </div>
                 {!testSuccess ? (
                   <>
@@ -743,7 +737,7 @@ export default function SetupPage() {
                 ) : (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-sm text-onSurface-positive-primary">
-                      <Check className="size-4" /> Memory created successfully
+                      <Check className="size-4" /> API key verified successfully
                     </div>
                     <Button type="submit" className="w-full">
                       Go to Dashboard
