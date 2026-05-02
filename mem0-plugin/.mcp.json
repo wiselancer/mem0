@@ -1,10 +1,13 @@
 {
   "mcpServers": {
     "mem0": {
-      "type": "http",
-      "url": "https://mcp.mem0.ai/mcp/",
-      "headers": {
-        "Authorization": "Token ${MEM0_API_KEY}"
+      "command": "python3",
+      "args": [
+        "./scripts/self_hosted_mcp.py"
+      ],
+      "env": {
+        "MEM0_SELF_HOSTED_API_URL": "https://api.mem.petrenko.cv",
+        "MEM0_USER_ID": "wiselancer"
       }
     }
   }

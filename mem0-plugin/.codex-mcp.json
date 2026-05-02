@@ -1,8 +1,15 @@
 {
   "mcpServers": {
     "mem0": {
-      "url": "https://mcp.mem0.ai/mcp",
-      "bearer_token_env_var": "MEM0_API_KEY"
+      "command": "python3",
+      "args": [
+        "./scripts/self_hosted_mcp.py"
+      ],
+      "env": {
+        "MEM0_SELF_HOSTED_API_URL": "https://api.mem.petrenko.cv",
+        "MEM0_AGENT_ID": "codex",
+        "MEM0_USER_ID": "wiselancer"
+      }
     }
   }
 }

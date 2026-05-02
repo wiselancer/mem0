@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import subprocess
 import sys
 import urllib.request
 import urllib.error
@@ -27,7 +28,7 @@ _handler = logging.StreamHandler(sys.stderr)
 _handler.setFormatter(logging.Formatter("[mem0-capture] %(message)s"))
 log.addHandler(_handler)
 
-API_URL = "https://api.mem0.ai"
+HOSTED_API_URL = "https://api.mem0.ai"
 MAX_TAIL_LINES = 500
 MAX_USER_MESSAGES = 30
 MAX_BASH_COMMANDS = 20
@@ -149,27 +150,64 @@ def build_content(state: dict, source: str) -> str:
     return "\n".join(parts)
 
 
-def store_memory(api_key: str, content: str, user_id: str, source: str) -> bool:
+def derive_run_id(hook_input: dict) -> str:
+    """Derive a project-like run id from the hook cwd when none is set."""
+    env_run_id = os.environ.get("MEM0_RUN_ID") or os.environ.get("MEM0_PROJECT_ID")
+    if env_run_id:
+        return env_run_id
+
+    cwd = hook_input.get("cwd") or os.getcwd()
+    try:
+        root = subprocess.check_output(
+            ["git", "-C", cwd, "rev-parse", "--show-toplevel"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+        ).strip()
+        if root:
+            return os.path.basename(root)
+    except Exception:
+        pass
+
+    return os.path.basename(os.path.abspath(cwd)) if cwd else ""
+
+
+def store_memory(api_key: str, content: str, user_id: str, source: str, self_hosted_api_url: str = "") -> bool:
     """Store session state as a memory via the Mem0 REST API."""
+    agent_id = os.environ.get("MEM0_AGENT_ID", "agent")
+    run_id = ""
     body = {
         "messages": [
             {"role": "user", "content": content}
         ],
         "user_id": user_id,
+        "agent_id": agent_id,
         "metadata": {
             "type": "session_state",
             "source": source,
         },
     }
+    if store_memory.run_id:
+        body["run_id"] = store_memory.run_id
 
     data = json.dumps(body).encode("utf-8")
-    req = urllib.request.Request(
-        f"{API_URL}/v1/memories/",
-        data=data,
-        headers={
+    if self_hosted_api_url:
+        url = f"{self_hosted_api_url.rstrip('/')}/memories"
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-Key": api_key,
+        }
+    else:
+        url = f"{HOSTED_API_URL}/v1/memories/"
+        headers = {
             "Content-Type": "application/json",
             "Authorization": f"Token {api_key}",
-        },
+        }
+
+    req = urllib.request.Request(
+        url,
+        data=data,
+        headers=headers,
         method="POST",
     )
 
@@ -191,9 +229,10 @@ def main():
         if arg.startswith("--source="):
             source = arg.split("=", 1)[1]
 
-    api_key = os.environ.get("MEM0_API_KEY", "")
+    self_hosted_api_url = os.environ.get("MEM0_SELF_HOSTED_API_URL") or os.environ.get("MEM0_API_URL", "")
+    api_key = os.environ.get("MEM0_SELF_HOSTED_API_KEY" if self_hosted_api_url else "MEM0_API_KEY", "")
     if not api_key:
-        log.debug("MEM0_API_KEY not set, skipping capture")
+        log.debug("Mem0 API key not set, skipping capture")
         return
 
     try:
@@ -208,6 +247,7 @@ def main():
         return
 
     user_id = os.environ.get("MEM0_USER_ID", os.environ.get("USER", "default"))
+    store_memory.run_id = derive_run_id(hook_input)
 
     lines = tail_lines(transcript_path, MAX_TAIL_LINES)
     if not lines:
@@ -228,7 +268,10 @@ def main():
         len(state["bash_commands"]),
     )
 
-    store_memory(api_key, content, user_id, source)
+    store_memory(api_key, content, user_id, source, self_hosted_api_url)
+
+
+store_memory.run_id = ""
 
 
 if __name__ == "__main__":

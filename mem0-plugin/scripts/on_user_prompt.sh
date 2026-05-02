@@ -7,8 +7,8 @@
 # Input:  JSON on stdin with prompt, session_id, cwd, transcript_path
 # Output: Matching memories as context text (exit 0)
 #
-# Skips search for very short prompts (< 20 chars) and when
-# MEM0_API_KEY is not set. Uses a 3s timeout to minimize latency.
+# Skips search for very short prompts (< 20 chars) and when no Mem0 API key
+# is set. Uses a 3s timeout to minimize latency.
 
 # Intentionally omit -e so the script always exits 0 even if
 # curl or jq fail — must never block the user's prompt.
@@ -22,24 +22,42 @@ if [ ${#PROMPT} -lt 20 ]; then
   exit 0
 fi
 
-API_KEY="${MEM0_API_KEY:-}"
+SELF_HOSTED_API_URL="${MEM0_SELF_HOSTED_API_URL:-${MEM0_API_URL:-}}"
+SELF_HOSTED_API_KEY="${MEM0_SELF_HOSTED_API_KEY:-}"
+HOSTED_API_KEY="${MEM0_API_KEY:-}"
+
+API_KEY="$HOSTED_API_KEY"
+if [ -n "$SELF_HOSTED_API_URL" ]; then
+  API_KEY="$SELF_HOSTED_API_KEY"
+fi
+
 if [ -z "$API_KEY" ]; then
   exit 0
 fi
 
 USER_ID="${MEM0_USER_ID:-${USER:-default}}"
 
-# Build request body safely via jq to avoid injection
-BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" \
-  '{query: $query, filters: {user_id: $user_id}, top_k: 5}')
+if [ -n "$SELF_HOSTED_API_URL" ]; then
+  BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" \
+    '{query: $query, user_id: $user_id, top_k: 5}')
 
-# Search mem0 for memories relevant to this prompt
-RESPONSE=$(curl -s --max-time 3 \
-  -X POST "https://api.mem0.ai/v2/memories/search/" \
-  -H "Authorization: Token $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d "$BODY" \
-  2>/dev/null || echo "")
+  RESPONSE=$(curl -s --max-time 3 \
+    -X POST "${SELF_HOSTED_API_URL%/}/search" \
+    -H "X-API-Key: $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "$BODY" \
+    2>/dev/null || echo "")
+else
+  BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" \
+    '{query: $query, filters: {user_id: $user_id}, top_k: 5}')
+
+  RESPONSE=$(curl -s --max-time 3 \
+    -X POST "https://api.mem0.ai/v2/memories/search/" \
+    -H "Authorization: Token $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "$BODY" \
+    2>/dev/null || echo "")
+fi
 
 if [ -z "$RESPONSE" ]; then
   exit 0

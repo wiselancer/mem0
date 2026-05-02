@@ -1,9 +1,9 @@
 ---
 name: mem0-codex
 description: >
-  Mem0 persistent memory integration for Codex. Automatically retrieve relevant
-  memories at the start of each task, store key learnings when tasks complete,
-  and capture session state before context is lost. Use the mem0 MCP tools
+  Mem0 persistent memory integration for Codex. Retrieve relevant memories at
+  the start of each task and store only durable, non-duplicate learnings when
+  meaningful work completes. Use the mem0 MCP tools
   (add_memory, search_memories, get_memories, etc.) for all memory operations.
 ---
 
@@ -19,20 +19,46 @@ You have access to persistent memory via the mem0 MCP tools. Follow this protoco
 
 ## After completing significant work
 
-Extract key learnings and store them using the `add_memory` tool:
+Search existing memories first. Then store only durable learnings using the `add_memory` tool:
 
 - **Decisions made** -> Include metadata `{"type": "decision"}`
+- **Current project state, milestones, blockers, or next steps** -> Include metadata `{"type": "project_state"}`
 - **Strategies that worked** -> Include metadata `{"type": "task_learning"}`
 - **Failed approaches** -> Include metadata `{"type": "anti_pattern"}`
 - **User preferences observed** -> Include metadata `{"type": "user_preference"}`
+- **Explicit standing rules or policies** -> Include metadata `{"type": "standing_rule"}`
 - **Environment/setup discoveries** -> Include metadata `{"type": "environmental"}`
 - **Conventions established** -> Include metadata `{"type": "convention"}`
 
-Memories can be as detailed as needed -- include full context, reasoning, code snippets, file paths, and examples. Longer, searchable memories are more valuable than vague one-liners.
+Use project/entity metadata whenever possible so memories can be reused across
+Claude Code, Codex, Cursor, OpenClaw, Hermes, and future tools:
+
+```json
+{
+  "type": "decision",
+  "project": "project-or-repo-name",
+  "source": "agent-session",
+  "agent": "codex",
+  "importance": "high",
+  "entities": ["Mem0", "Coolify", "GCP"],
+  "visibility": "private"
+}
+```
+
+Memories should be self-contained, specific, searchable, and export-friendly.
+Prefer "As of YYYY-MM-DD, user decided..." over vague summaries like "we talked
+about deployment." Do not store secrets, API keys, tokens, passwords, or raw
+`.env` values.
+
+Skip memory writes for confirmations, passing tests, one-off observations,
+temporary errors that were fixed, and repeated facts already captured elsewhere.
+If a similar memory exists, update it or skip the new write instead of creating a
+near-duplicate.
 
 ## Before losing context
 
-If context is about to be compacted or the session is ending, store a comprehensive session summary:
+If context is about to be compacted or the session is ending and there is
+meaningful unresolved state, store one concise session summary:
 
 ```
 ## Session Summary
@@ -60,3 +86,9 @@ Include metadata: `{"type": "session_state"}`
 - Do NOT write to MEMORY.md or any file-based memory. Use mem0 MCP tools exclusively.
 - Only store genuinely useful learnings. Skip trivial interactions.
 - Use specific, searchable language in memory content.
+- Store durable memory, not transcripts. Raw logs belong outside Mem0.
+- Avoid pronouns and vague references; use named entities like "GCP Coolify deployment" or "Mem0".
+- Keep related details about the same decision, project, or service together in one memory.
+- Include absolute dates for time-sensitive facts.
+- Use the two-week test: store it only if it is likely to matter two weeks from now.
+- Prefer canonical setup memories over breadcrumbs: decisions, stable setup facts, standing rules, and reusable lessons.

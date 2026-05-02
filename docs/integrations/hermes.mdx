@@ -31,6 +31,22 @@ When Mem0 is active, the LLM gets three extra tools it can call during conversat
 | `mem0_search` | Semantic search through memories (supports optional reranking via `rerank` and `top_k` parameters) |
 | `mem0_conclude` | Store a specific fact verbatim — uses `infer=False` so no server-side LLM extraction happens |
 
+## Memory Quality
+
+Hermes should use the same memory shape as other Mem0-enabled agents such as Claude Code, Codex, Cursor, and OpenClaw:
+
+- Store durable facts, decisions, preferences, project state, environment setup, and reusable lessons.
+- Skip raw transcripts, vague summaries, trivial interactions, and secrets.
+- Use a stable `user_id` across trusted agents and `agent_id: hermes` to identify Hermes-written memories.
+- Prefer self-contained facts with absolute dates when time matters.
+- Use `mem0_conclude` for curated facts that should be stored exactly as written.
+
+Example curated memory:
+
+```text
+As of 2026-05-02, user has Coolify running on GCP and wants it to become the new deployment home while gradually migrating apps away from Hetzner.
+```
+
 ## Installation
 
 Install Hermes Agent:

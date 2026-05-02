@@ -1,10 +1,12 @@
 # Mem0 Plugin for Claude Code, Claude Cowork, Cursor & Codex
 
-Add persistent memory to your AI workflows. Store, retrieve, and manage memories across sessions using the Mem0 Platform. Works with **Claude Code** (CLI), **Claude Cowork** (desktop app), **Cursor**, and **Codex**.
+Add persistent memory to your AI workflows. Store, retrieve, and manage memories across sessions using the Mem0 Platform or a self-hosted Mem0 REST server. Works with **Claude Code** (CLI), **Claude Cowork** (desktop app), **Cursor**, and **Codex**.
 
 ## Step 1: Set your API key
 
 > **You must complete this step before installing the plugin.**
+
+### Hosted Mem0
 
 1. Sign up at [app.mem0.ai](https://app.mem0.ai?utm_source=oss&utm_medium=mem0-plugin-readme) if you haven't already
 2. Go to [app.mem0.ai/dashboard/api-keys](https://app.mem0.ai/dashboard/api-keys?utm_source=oss&utm_medium=mem0-plugin-readme)
@@ -28,9 +30,19 @@ Add persistent memory to your AI workflows. Store, retrieve, and manage memories
    # Should print: m0-your-api-key
    ```
 
+### Self-hosted Mem0
+
+For a self-hosted Mem0 REST server, use the server API URL and an API key created in your Mem0 dashboard:
+
+```bash
+export MEM0_SELF_HOSTED_API_URL="https://api.mem.example.com"
+export MEM0_SELF_HOSTED_API_KEY="m0sk-your-self-hosted-key"
+export MEM0_USER_ID="your-user-id"
+```
+
 ## Step 2: Install the plugin
 
-Choose one of the options below. All require `MEM0_API_KEY` to be set first (see above).
+Choose one of the options below. Hosted installs require `MEM0_API_KEY`; self-hosted installs require `MEM0_SELF_HOSTED_API_URL` and `MEM0_SELF_HOSTED_API_KEY`.
 
 ### Claude Code (CLI) / Claude Cowork (Desktop)
 
@@ -73,6 +85,8 @@ codex plugin marketplace add ~/codex-plugins/mem0-source
 This points Codex at the repo's `.agents/plugins/marketplace.json`, which references `mem0-plugin/` as the local source. Restart Codex, run `/plugins`, and install **Mem0** from the **Mem0 Plugins** marketplace.
 
 > **Don't combine with Option A.** The plugin manifest auto-registers `mem0` as an MCP server via `mem0-plugin/.codex-mcp.json` — adding a manual `[mcp_servers.mem0]` block would duplicate the registration.
+>
+> For self-hosted installs, `mem0-plugin/.codex-mcp.json` uses `scripts/self_hosted_mcp.py`, a local stdio MCP bridge that talks to the self-hosted REST API. Hosted installs can point this file back at `https://mcp.mem0.ai/mcp`.
 
 **Optional — enable lifecycle hooks.** Codex doesn't auto-wire hooks from plugin manifests; it only reads `~/.codex/hooks.json` (or `<repo>/.codex/hooks.json`) ([docs](https://developers.openai.com/codex/hooks)). Run the bundled installer once to merge Mem0's entries:
 
@@ -152,14 +166,27 @@ After installing, confirm the MCP server is connected:
 | Mem0 SDK Skill | Yes | Yes | No | Yes | No |
 | Memory Protocol Skill | No | No | No | Yes | No |
 
-- **MCP Server** — Connects to the Mem0 remote MCP server (`mcp.mem0.ai`), providing tools to add, search, update, and delete memories. No local dependencies required.
+- **MCP Server** — Connects to either the Mem0 remote MCP server (`mcp.mem0.ai`) or the local self-hosted bridge (`scripts/self_hosted_mcp.py`), providing tools to add, search, update, and delete memories.
 - **Lifecycle Hooks** — Automatic memory capture at key points. Claude Code and Cursor wire hooks up natively when the plugin is installed (session start, context compaction, task completion, session end). Codex hooks are opt-in via a one-time installer (`scripts/install_codex_hooks.py`) that writes entries into `~/.codex/hooks.json` for `SessionStart`, `UserPromptSubmit`, and `Stop`.
 - **Mem0 SDK Skill** — Guides the AI on how to integrate the Mem0 SDK (Python & TypeScript) into your applications.
 - **Memory Protocol Skill** — Codex-specific skill that instructs the agent to retrieve relevant memories at task start, store learnings on completion, and capture session state before context loss. Complements the lifecycle hooks on Codex.
 
+## Shared agent memory protocol
+
+Use [AGENT_MEMORY_PROTOCOL.md](./AGENT_MEMORY_PROTOCOL.md) as the common memory contract across Claude Code, Codex, Cursor, OpenClaw, Hermes, and other Mem0-enabled agents.
+
+In short:
+
+- Recall relevant memories before starting meaningful work.
+- Store durable facts, decisions, preferences, setup discoveries, project state, and reusable lessons.
+- Skip raw transcripts, vague summaries, trivial interactions, and secrets.
+- Use stable `user_id` across trusted agents; use `agent_id` or metadata to identify the writer.
+- Include metadata such as `type`, `project`, `source`, `agent`, `importance`, `entities`, and `visibility`.
+- Keep memories self-contained and export-friendly so they can later become Obsidian notes or knowledge graph nodes.
+
 ## MCP Tools
 
-Once installed, the following tools are available:
+Once installed, the hosted MCP server exposes the following tools. The self-hosted bridge exposes the core memory tools: add, search, list, get, update, delete one, and delete all.
 
 | Tool | Description |
 |------|-------------|

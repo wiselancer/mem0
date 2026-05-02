@@ -104,6 +104,40 @@ services:
       - NEXT_PUBLIC_API_URL=
       - API_INTERNAL_URL=http://mem0:8000
       - NEXT_PUBLIC_INSTANCE_NAME=${NEXT_PUBLIC_INSTANCE_NAME:-Mem0}
+  mcp-gateway:
+    build:
+      context: ./mcp-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "8000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mem0-mcp-http.rule=Host(`${MEM0_MCP_DOMAIN:-mcp.mem.petrenko.cv}`)
+      - traefik.http.routers.mem0-mcp-http.entrypoints=http
+      - traefik.http.routers.mem0-mcp-http.middlewares=redirect-to-https
+      - traefik.http.routers.mem0-mcp-http.service=mem0-mcp
+      - traefik.http.routers.mem0-mcp-https.rule=Host(`${MEM0_MCP_DOMAIN:-mcp.mem.petrenko.cv}`)
+      - traefik.http.routers.mem0-mcp-https.entrypoints=https
+      - traefik.http.routers.mem0-mcp-https.tls=true
+      - traefik.http.routers.mem0-mcp-https.tls.certresolver=letsencrypt
+      - traefik.http.routers.mem0-mcp-https.service=mem0-mcp
+      - traefik.http.services.mem0-mcp.loadbalancer.server.port=8000
+      - traefik.docker.network=coolify
+    networks:
+      - mem0_network
+      - coolify
+    environment:
+      - MEM0_SELF_HOSTED_API_URL=http://mem0:8000
+      - MEM0_SELF_HOSTED_API_KEY=${MCP_MEM0_API_KEY:-${ADMIN_API_KEY:-}}
+      - MCP_GATEWAY_TOKEN=${MCP_GATEWAY_TOKEN:?}
+      - MCP_GATEWAY_USER_ID=${MCP_GATEWAY_USER_ID:-wiselancer}
+      - MCP_GATEWAY_AGENT_ID=${MCP_GATEWAY_AGENT_ID:-agent}
+      - MCP_GATEWAY_RUN_ID=${MCP_GATEWAY_RUN_ID:-}
+      - MCP_GATEWAY_TOKENS=${MCP_GATEWAY_TOKENS:-}
+    depends_on:
+      mem0:
+        condition: service_started
   postgres:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
