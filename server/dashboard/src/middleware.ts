@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   "/memories",
   "/requests",
   "/reset",
+  "/search",
   "/favicon",
 ];
 

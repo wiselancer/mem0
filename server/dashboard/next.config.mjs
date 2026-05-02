@@ -49,6 +49,10 @@ const nextConfig = {
         destination: `${apiUrl}/memories/:path*`,
       },
       {
+        source: "/search",
+        destination: `${apiUrl}/search`,
+      },
+      {
         source: "/api-keys/:path*",
         destination: `${apiUrl}/api-keys/:path*`,
       },
