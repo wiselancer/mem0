@@ -97,8 +97,14 @@ export default function SetupPage() {
   const [testMessage, setTestMessage] = useState(DEFAULT_TEST_MESSAGE);
   const [isGeneratingInstructions, setIsGeneratingInstructions] =
     useState(false);
+  const [origin, setOrigin] = useState("");
 
   const apiUrl = getApiBaseUrl();
+  const displayApiUrl = apiUrl || origin;
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   useEffect(() => {
     if (step !== 1) {
@@ -707,13 +713,7 @@ export default function SetupPage() {
               >
                 <div className="space-y-1">
                   <Label>Test your setup</Label>
-                  {!apiUrl && (
-                    <p className="text-xs text-onSurface-danger-primary">
-                      NEXT_PUBLIC_API_URL is not set. Set it in .env and restart
-                      before running this test.
-                    </p>
-                  )}
-                  <pre className="text-xs bg-surface-default-secondary p-3 rounded font-mono overflow-x-auto">{`curl -X POST ${apiUrl}/memories \\
+                  <pre className="text-xs bg-surface-default-secondary p-3 rounded font-mono overflow-x-auto">{`curl -X POST ${displayApiUrl}/memories \\
   -H "X-API-Key: ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d '{"messages": [{"role": "user", "content": "${testMessage}"}], "user_id": "setup-test"}'`}</pre>

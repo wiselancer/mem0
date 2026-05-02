@@ -212,6 +212,23 @@ class GenerateInstructionsRequest(BaseModel):
     use_case: str = Field(..., description="Description of what the user will use Mem0 for.")
 
 
+def _generate_setup_instructions(use_case: str) -> Dict[str, str]:
+    normalized_use_case = " ".join(use_case.split()).strip()
+    if not normalized_use_case:
+        normalized_use_case = "personal assistant"
+
+    instructions = (
+        f"Prioritize durable details that help with {normalized_use_case}: user preferences, recurring goals, "
+        "important people and projects, stable constraints, decisions, and context that should improve future "
+        "answers. Ignore short-lived logistics, one-off requests, secrets, and sensitive personal details unless "
+        "the user clearly asks to remember them."
+    )
+    test_message = (
+        f"For my {normalized_use_case} setup, remember that I prefer concise updates and practical next steps."
+    )
+    return {"custom_instructions": instructions, "test_message": test_message}
+
+
 def _redact_config(value: Any, key: str | None = None) -> Any:
     if isinstance(value, dict):
         return {item_key: _redact_config(item_value, item_key) for item_key, item_value in value.items()}
@@ -332,29 +349,8 @@ def set_config(config: Dict[str, Any], _auth=Depends(verify_auth)):
 
 @app.post("/generate-instructions", summary="Generate custom instructions from a use case")
 def generate_instructions(req: GenerateInstructionsRequest, _auth=Depends(verify_auth)):
-    """Generate custom instructions and a contextual test message tailored to a use case."""
-    try:
-        llm = get_memory_instance().llm
-        prompt = (
-            "You are configuring a memory system. Given the use case below, produce two things:\n"
-            "1. INSTRUCTIONS: A short paragraph of custom instructions telling the memory extraction system "
-            "what kinds of facts, preferences, and context to prioritize. Be specific to the use case.\n"
-            "2. TEST_MESSAGE: A single realistic sentence a user in this use case would say, suitable for "
-            "testing that the memory system works.\n\n"
-            "Respond in exactly this format (no markdown, no extra text):\n"
-            "INSTRUCTIONS: <your instructions>\n"
-            f"TEST_MESSAGE: <your test message>\n\nUse case: {req.use_case}"
-        )
-        response = llm.generate_response([{"role": "user", "content": prompt}])
-        instructions = response
-        test_message = "I like to hike on weekends."
-        if "INSTRUCTIONS:" in response and "TEST_MESSAGE:" in response:
-            parts = response.split("TEST_MESSAGE:")
-            instructions = parts[0].replace("INSTRUCTIONS:", "").strip()
-            test_message = parts[1].strip()
-        return {"custom_instructions": instructions, "test_message": test_message}
-    except Exception:
-        raise upstream_error()
+    """Generate setup instructions without depending on the configured LLM."""
+    return _generate_setup_instructions(req.use_case)
 
 
 @app.post("/memories", summary="Create memories")
