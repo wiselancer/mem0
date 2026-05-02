@@ -424,7 +424,19 @@ def get_memory(memory_id: str, _auth=Depends(verify_auth)):
 def search_memories(search_req: SearchRequest, _auth=Depends(verify_auth)):
     """Search for memories based on a query."""
     try:
-        params = {k: v for k, v in search_req.model_dump().items() if v is not None and k != "query"}
+        request_data = search_req.model_dump()
+        filters = request_data.get("filters") or {}
+        for key in ("user_id", "run_id", "agent_id"):
+            if request_data.get(key) is not None:
+                filters[key] = request_data[key]
+
+        params = {
+            k: request_data[k]
+            for k in ("top_k", "threshold")
+            if request_data.get(k) is not None
+        }
+        if filters:
+            params["filters"] = filters
         return get_memory_instance().search(query=search_req.query, **params)
     except Exception:
         raise upstream_error()
