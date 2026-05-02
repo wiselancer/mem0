@@ -31,6 +31,7 @@ services:
       - PYTHONPATH=
       - OPENAI_API_KEY=${OPENAI_API_KEY:?}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
       - POSTGRES_HOST=mem0-postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgres
