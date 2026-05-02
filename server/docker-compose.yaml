@@ -12,6 +12,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.mem0-api-mem-http.rule=Host(`api.mem.petrenko.cv`)
       - traefik.http.routers.mem0-api-mem-http.entrypoints=http
+      - traefik.http.routers.mem0-api-mem-http.middlewares=redirect-to-https
       - traefik.http.routers.mem0-api-mem-http.service=mem0-api
       - traefik.http.routers.mem0-api-mem-https.rule=Host(`api.mem.petrenko.cv`)
       - traefik.http.routers.mem0-api-mem-https.entrypoints=https
@@ -67,6 +68,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.mem0-ui-mem-http.rule=Host(`mem.petrenko.cv`)
       - traefik.http.routers.mem0-ui-mem-http.entrypoints=http
+      - traefik.http.routers.mem0-ui-mem-http.middlewares=redirect-to-https
       - traefik.http.routers.mem0-ui-mem-http.service=mem0-ui
       - traefik.http.routers.mem0-ui-mem-https.rule=Host(`mem.petrenko.cv`)
       - traefik.http.routers.mem0-ui-mem-https.entrypoints=https
