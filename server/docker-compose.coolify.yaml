@@ -79,7 +79,7 @@ services:
         condition: service_started
     environment:
       - SERVICE_FQDN_DASHBOARD_3000=mem0.petrenko.cv
-      - NEXT_PUBLIC_API_URL=${API_URL:?}
+      - NEXT_PUBLIC_API_URL=https://mem0-api.petrenko.cv
       - API_INTERNAL_URL=http://mem0:8000
       - NEXT_PUBLIC_INSTANCE_NAME=${NEXT_PUBLIC_INSTANCE_NAME:-Mem0}
   postgres:
