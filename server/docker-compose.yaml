@@ -26,6 +26,8 @@ services:
       postgres:
         condition: service_started
     command: ["sh", "/app/start.sh"]
+    volumes:
+      - mem0_history:/app/history
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=
@@ -101,6 +103,7 @@ services:
 
 volumes:
   postgres_db_pg16_v3:
+  mem0_history:
 
 networks:
   coolify:
