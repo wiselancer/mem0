@@ -95,11 +95,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
-      - postgres_db_pg16_v2:/var/lib/postgresql/data
+      - postgres_db_pg16_v3:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
 
 volumes:
-  postgres_db_pg16_v2:
+  postgres_db_pg16_v3:
 
 networks:
   coolify:
