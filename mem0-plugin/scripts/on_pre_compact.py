@@ -229,7 +229,10 @@ def main():
         if arg.startswith("--source="):
             source = arg.split("=", 1)[1]
 
-    self_hosted_api_url = os.environ.get("MEM0_SELF_HOSTED_API_URL") or os.environ.get("MEM0_API_URL", "")
+    mem0_backend = os.environ.get("MEM0_BACKEND", "hosted")
+    self_hosted_api_url = ""
+    if mem0_backend == "self_hosted":
+        self_hosted_api_url = os.environ.get("MEM0_SELF_HOSTED_API_URL") or os.environ.get("MEM0_API_URL", "")
     api_key = os.environ.get("MEM0_SELF_HOSTED_API_KEY" if self_hosted_api_url else "MEM0_API_KEY", "")
     if not api_key:
         log.debug("Mem0 API key not set, skipping capture")

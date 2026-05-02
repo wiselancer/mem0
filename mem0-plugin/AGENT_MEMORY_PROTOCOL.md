@@ -102,21 +102,43 @@ When the memory is time-sensitive, include an absolute date in the memory text:
 
 ## Scoping
 
-Use one stable `user_id` across agents for personal memory. Use `agent_id` for
-the agent or tool that wrote the memory. Use project metadata for filtering.
+Use hosted Mem0 for personal memory by default. Keep self-hosted Mem0 for
+explicit project-specific memory spaces. Use one stable `user_id` across agents
+for personal memory. Use `agent_id` for the agent or tool that wrote the memory.
+Use project metadata for filtering.
 
 Recommended defaults:
 
 | Field | Example |
 | ----- | ------- |
 | `user_id` | `wiselancer` |
-| `agent_id` | `codex`, `claude-code`, `openclaw`, `hermes` |
+| `agent_id` | `codex`, `claude-code`, `openclaw`, `hermes`, `sheldon` |
 | `run_id` | A session or task identifier when available |
 | `metadata.project` | `gcp-coolify-mem0` |
 
 Avoid creating separate users for each agent unless memory isolation is the goal.
 Shared memory works best when all trusted agents write into the same user scope
 and distinguish themselves with `agent_id` or metadata.
+
+When using hosted Mem0 MCP, pass `user_id="wiselancer"` explicitly on
+`add_memory`, `search_memories`, `get_memories`, `delete_all_memories`, and any
+scope-sensitive call. The hosted MCP server defaults to `user_id="mem0-mcp"` if
+the caller omits a user, which is not the desired personal-memory scope.
+
+For normal recall, search the user scope:
+
+```json
+{"user_id": "wiselancer"}
+```
+
+For cross-agent recall, use `OR` rather than `AND`:
+
+```json
+{"OR": [{"user_id": "wiselancer"}, {"agent_id": "codex"}]}
+```
+
+Do not use an `AND` filter combining `user_id` and `agent_id`; hosted Mem0 stores
+entity scopes separately, so that pattern commonly returns empty results.
 
 ## Agent Tool Mapping
 

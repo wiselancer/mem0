@@ -27,6 +27,10 @@ Check whether this completed task produced durable learnings worth storing with 
 Include project/entity metadata when possible, for example:
 \`{"type":"decision","project":"project-or-repo-name","source":"agent-session","agent":"claude-code","importance":"high","entities":["Mem0"],"visibility":"private"}\`
 
+Use hosted Mem0 for personal memory unless the user explicitly requests the self-hosted/project-specific backend. For hosted Mem0, always pass \`user_id: "wiselancer"\` on writes/searches. Also pass \`agent_id\` for the writer/runtime (\`codex\`, \`claude-code\`, \`hermes\`, \`openclaw\`, \`sheldon\`) and use metadata for \`project\`, \`type\`, \`source\`, \`entities\`, and \`visibility\`. Use \`run_id\` only for a current project/session grouping; do not reuse one global \`run_id\` across unrelated projects.
+
+When searching hosted Mem0, prefer user scope first: \`filters: {"user_id":"wiselancer"}\`. If you need both personal and agent-specific memories, use \`OR\`, for example \`filters: {"OR":[{"user_id":"wiselancer"},{"agent_id":"claude-code"}]}\`. Do not use \`AND\` with \`user_id\` + \`agent_id\`; Mem0 stores entity scopes separately and that returns empty results.
+
 Before adding, search existing memories and skip or update if a similar memory already exists. Memories should be self-contained, searchable, and export-friendly for future tools like Obsidian. Use absolute dates for time-sensitive facts. Do not store secrets, API keys, tokens, passwords, or raw \`.env\` values.
 Only store genuinely useful learnings that will still matter in two weeks — skip if the task was trivial or merely confirms something worked.
 EOF

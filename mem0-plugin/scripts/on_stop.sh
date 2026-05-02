@@ -36,6 +36,10 @@ Include project/entity metadata when possible, for example:
 
 Store durable memory, not transcripts. Memories should be self-contained, searchable, and export-friendly for future tools like Obsidian. Use absolute dates for time-sensitive facts. Do not store secrets, API keys, tokens, passwords, or raw `.env` values.
 
+Use hosted Mem0 for personal memory unless the user explicitly requests the self-hosted/project-specific backend. For hosted Mem0, always pass `user_id: "wiselancer"` on writes/searches. Also pass `agent_id` for the writer/runtime (`codex`, `claude-code`, `hermes`, `openclaw`, `sheldon`) and use metadata for `project`, `type`, `source`, `entities`, and `visibility`. Use `run_id` only for a current project/session grouping; do not reuse one global `run_id` across unrelated projects.
+
+When searching hosted Mem0, prefer user scope first: `filters: {"user_id":"wiselancer"}`. If you need both personal and agent-specific memories, use `OR`, for example `filters: {"OR":[{"user_id":"wiselancer"},{"agent_id":"claude-code"}]}`. Do not use `AND` with `user_id` + `agent_id`; Mem0 stores entity scopes separately and that returns empty results.
+
 If nothing notable happened in this interaction, it's fine to skip. Only store genuinely useful learnings.
 EOF
 

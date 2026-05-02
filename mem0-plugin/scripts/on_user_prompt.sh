@@ -22,7 +22,11 @@ if [ ${#PROMPT} -lt 20 ]; then
   exit 0
 fi
 
-SELF_HOSTED_API_URL="${MEM0_SELF_HOSTED_API_URL:-${MEM0_API_URL:-}}"
+MEM0_BACKEND="${MEM0_BACKEND:-hosted}"
+SELF_HOSTED_API_URL=""
+if [ "$MEM0_BACKEND" = "self_hosted" ]; then
+  SELF_HOSTED_API_URL="${MEM0_SELF_HOSTED_API_URL:-${MEM0_API_URL:-}}"
+fi
 SELF_HOSTED_API_KEY="${MEM0_SELF_HOSTED_API_KEY:-}"
 HOSTED_API_KEY="${MEM0_API_KEY:-}"
 
@@ -36,6 +40,7 @@ if [ -z "$API_KEY" ]; then
 fi
 
 USER_ID="${MEM0_USER_ID:-${USER:-default}}"
+AGENT_ID="${MEM0_AGENT_ID:-codex}"
 
 if [ -n "$SELF_HOSTED_API_URL" ]; then
   BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" \
@@ -48,8 +53,8 @@ if [ -n "$SELF_HOSTED_API_URL" ]; then
     -d "$BODY" \
     2>/dev/null || echo "")
 else
-  BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" \
-    '{query: $query, filters: {user_id: $user_id}, top_k: 5}')
+  BODY=$(jq -n --arg query "$PROMPT" --arg user_id "$USER_ID" --arg agent_id "$AGENT_ID" \
+    '{query: $query, filters: {OR: [{user_id: $user_id}, {agent_id: $agent_id}]}, top_k: 5}')
 
   RESPONSE=$(curl -s --max-time 3 \
     -X POST "https://api.mem0.ai/v2/memories/search/" \

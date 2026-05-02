@@ -20,9 +20,11 @@ if [ "$SOURCE" = "startup" ]; then
 
 You have access to persistent memory via the mem0 MCP tools. Before doing anything else:
 
-1. Call `search_memories` with a query related to the current project or user request to load relevant context.
+1. Call `search_memories` with a query related to the current project or user request to load relevant context. For hosted personal memory, pass `filters: {"user_id":"wiselancer"}`.
 2. Review the returned memories to understand what has been learned in prior sessions.
 3. If appropriate, call `get_memories` to browse all stored memories for this user.
+
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use metadata for project/type/source/entities/visibility. If you need both personal and agent-specific memories, use `OR`; do not use `AND` with `user_id` + `agent_id`.
 
 IMPORTANT: Do NOT skip this step. Always bootstrap context first.
 EOF
@@ -33,8 +35,10 @@ elif [ "$SOURCE" = "resume" ]; then
 
 This is a resumed session. Your prior context is already loaded. Before continuing:
 
-1. Call `search_memories` with a query related to the current task to refresh relevant memories.
+1. Call `search_memories` with a query related to the current task to refresh relevant memories. For hosted personal memory, pass `filters: {"user_id":"wiselancer"}`.
 2. If significant time has passed, search for recent project-wide updates.
+
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use `OR` rather than `AND` when combining user and agent scope.
 
 Continue where you left off.
 EOF
@@ -45,9 +49,11 @@ elif [ "$SOURCE" = "compact" ]; then
 
 Context was just compacted. You may have lost important session context.
 
-1. Call `search_memories` with queries related to what you were working on to reload relevant knowledge.
+1. Call `search_memories` with queries related to what you were working on to reload relevant knowledge. For hosted personal memory, pass `filters: {"user_id":"wiselancer"}`.
 2. Check for any session state memories that were saved before compaction.
 3. Continue working based on the recovered context.
+
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use `OR` rather than `AND` when combining user and agent scope.
 EOF
 fi
 
