@@ -76,7 +76,7 @@ services:
       - coolify
     environment:
       - SERVICE_FQDN_DASHBOARD_3000=mem0.petrenko.cv
-      - NEXT_PUBLIC_API_URL=https://mem0-api.petrenko.cv
+      - NEXT_PUBLIC_API_URL=
       - API_INTERNAL_URL=http://mem0:8000
       - NEXT_PUBLIC_INSTANCE_NAME=${NEXT_PUBLIC_INSTANCE_NAME:-Mem0}
     depends_on:

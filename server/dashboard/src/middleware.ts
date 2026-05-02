@@ -4,9 +4,17 @@ import { getServerApiUrl } from "@/lib/server-api-url";
 
 const PUBLIC_PATHS = [
   "/_next",
+  "/auth",
+  "/api-keys",
   "/api/auth",
   "/api/health",
+  "/configure",
+  "/entities",
   "/fonts",
+  "/generate-instructions",
+  "/memories",
+  "/requests",
+  "/reset",
   "/favicon",
 ];
 
