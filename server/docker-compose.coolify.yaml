@@ -19,14 +19,6 @@ services:
       - traefik.http.routers.mem0-api-mem-https.tls=true
       - traefik.http.routers.mem0-api-mem-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-api-mem-https.service=mem0-api
-      - traefik.http.routers.mem0-api-http.rule=Host(`${MEM0_API_DOMAIN:-mem0-api.petrenko.cv}`)
-      - traefik.http.routers.mem0-api-http.entrypoints=http
-      - traefik.http.routers.mem0-api-http.service=mem0-api
-      - traefik.http.routers.mem0-api-https.rule=Host(`${MEM0_API_DOMAIN:-mem0-api.petrenko.cv}`)
-      - traefik.http.routers.mem0-api-https.entrypoints=https
-      - traefik.http.routers.mem0-api-https.tls=true
-      - traefik.http.routers.mem0-api-https.tls.certresolver=letsencrypt
-      - traefik.http.routers.mem0-api-https.service=mem0-api
       - traefik.http.services.mem0-api.loadbalancer.server.port=8000
       - traefik.docker.network=coolify
     networks:
@@ -77,22 +69,8 @@ services:
       - traefik.http.routers.mem0-ui-mem-https.tls=true
       - traefik.http.routers.mem0-ui-mem-https.tls.certresolver=letsencrypt
       - traefik.http.routers.mem0-ui-mem-https.service=mem0-ui
-      - traefik.http.routers.mem0-ui-http.rule=Host(`${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}`)
-      - traefik.http.routers.mem0-ui-http.entrypoints=http
-      - traefik.http.routers.mem0-ui-http.service=mem0-ui
-      - traefik.http.routers.mem0-ui-https.rule=Host(`${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}`)
-      - traefik.http.routers.mem0-ui-https.entrypoints=https
-      - traefik.http.routers.mem0-ui-https.tls=true
-      - traefik.http.routers.mem0-ui-https.tls.certresolver=letsencrypt
-      - traefik.http.routers.mem0-ui-https.service=mem0-ui
       - traefik.http.services.mem0-ui.loadbalancer.server.port=3000
       - traefik.docker.network=coolify
-      - caddy_0=https://${MEM0_DASHBOARD_DOMAIN:-mem0.petrenko.cv}
-      - caddy_0.encode=zstd gzip
-      - caddy_0.handle_path=/*
-      - caddy_0.handle_path.0_reverse_proxy={{upstreams 3000}}
-      - caddy_0.header=-Server
-      - caddy_0.try_files={path} /index.html /index.php
     networks:
       - mem0_network
       - coolify
@@ -113,15 +91,15 @@ services:
       - "8000"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.mem0-mcp-http.rule=Host(`${MEM0_MCP_DOMAIN:-mcp.mem.petrenko.cv}`)
-      - traefik.http.routers.mem0-mcp-http.entrypoints=http
-      - traefik.http.routers.mem0-mcp-http.middlewares=redirect-to-https
-      - traefik.http.routers.mem0-mcp-http.service=mem0-mcp
-      - traefik.http.routers.mem0-mcp-https.rule=Host(`${MEM0_MCP_DOMAIN:-mcp.mem.petrenko.cv}`)
-      - traefik.http.routers.mem0-mcp-https.entrypoints=https
-      - traefik.http.routers.mem0-mcp-https.tls=true
-      - traefik.http.routers.mem0-mcp-https.tls.certresolver=letsencrypt
-      - traefik.http.routers.mem0-mcp-https.service=mem0-mcp
+      - traefik.http.routers.mem0-mcp-mem-http.rule=Host(`mcp.mem.petrenko.cv`)
+      - traefik.http.routers.mem0-mcp-mem-http.entrypoints=http
+      - traefik.http.routers.mem0-mcp-mem-http.middlewares=redirect-to-https
+      - traefik.http.routers.mem0-mcp-mem-http.service=mem0-mcp
+      - traefik.http.routers.mem0-mcp-mem-https.rule=Host(`mcp.mem.petrenko.cv`)
+      - traefik.http.routers.mem0-mcp-mem-https.entrypoints=https
+      - traefik.http.routers.mem0-mcp-mem-https.tls=true
+      - traefik.http.routers.mem0-mcp-mem-https.tls.certresolver=letsencrypt
+      - traefik.http.routers.mem0-mcp-mem-https.service=mem0-mcp
       - traefik.http.services.mem0-mcp.loadbalancer.server.port=8000
       - traefik.docker.network=coolify
     networks:
