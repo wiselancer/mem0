@@ -5,7 +5,8 @@
 # memory writes, and captures transcript state only when MEM0_AUTO_CAPTURE=true.
 #
 # Input:  JSON on stdin with stop_hook_active, transcript_path, cwd
-# Output: Text that becomes Claude's context (exit 0), or nothing
+# Output: Text that becomes Claude's context only when MEM0_STOP_HOOK_BLOCK=true,
+#         or nothing by default.
 #
 # IMPORTANT: Check stop_hook_active to avoid infinite loops.
 
@@ -17,6 +18,13 @@ INPUT=$(cat)
 STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null || echo "false")
 
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
+  exit 0
+fi
+
+if [ "${MEM0_STOP_HOOK_BLOCK:-false}" != "true" ]; then
+  if [ "${MEM0_AUTO_CAPTURE:-false}" = "true" ]; then
+    echo "$INPUT" | MEM0_AGENT_ID="${MEM0_AGENT_ID:-claude-code}" python3 "$SCRIPT_DIR/on_pre_compact.py" --source=session-end 2>/dev/null &
+  fi
   exit 0
 fi
 
@@ -42,9 +50,5 @@ When searching hosted Mem0, prefer user scope first: `filters: {"user_id":"wisel
 
 If nothing notable happened in this interaction, it's fine to skip. Only store genuinely useful learnings.
 EOF
-
-if [ "${MEM0_AUTO_CAPTURE:-false}" = "true" ]; then
-  echo "$INPUT" | MEM0_AGENT_ID="${MEM0_AGENT_ID:-claude-code}" python3 "$SCRIPT_DIR/on_pre_compact.py" --source=session-end 2>/dev/null &
-fi
 
 exit 0

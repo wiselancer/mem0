@@ -24,7 +24,7 @@ You have access to persistent memory via the mem0 MCP tools. Before doing anythi
 2. Review the returned memories to understand what has been learned in prior sessions.
 3. If appropriate, call `get_memories` to browse all stored memories for this user.
 
-Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use metadata for project/type/source/entities/visibility. If you need both personal and agent-specific memories, use `OR`; do not use `AND` with `user_id` + `agent_id`.
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass the active agent id (`codex`, `claude-code`, `openclaw`, `hermes`, or `sheldon`), and use metadata for project/type/source/entities/visibility. If you need both personal and agent-specific memories, use `OR`; do not use `AND` with `user_id` + `agent_id`.
 
 IMPORTANT: Do NOT skip this step. Always bootstrap context first.
 EOF
@@ -38,7 +38,7 @@ This is a resumed session. Your prior context is already loaded. Before continui
 1. Call `search_memories` with a query related to the current task to refresh relevant memories. For hosted personal memory, pass `filters: {"user_id":"wiselancer"}`.
 2. If significant time has passed, search for recent project-wide updates.
 
-Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use `OR` rather than `AND` when combining user and agent scope.
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass the active agent id (`codex`, `claude-code`, `openclaw`, `hermes`, or `sheldon`), and use `OR` rather than `AND` when combining user and agent scope.
 
 Continue where you left off.
 EOF
@@ -53,7 +53,7 @@ Context was just compacted. You may have lost important session context.
 2. Check for any session state memories that were saved before compaction.
 3. Continue working based on the recovered context.
 
-Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass `agent_id: "claude-code"` for Claude Code, and use `OR` rather than `AND` when combining user and agent scope.
+Use hosted Mem0 for personal memory by default. Always pass `user_id: "wiselancer"` on personal memory writes/searches, pass the active agent id (`codex`, `claude-code`, `openclaw`, `hermes`, or `sheldon`), and use `OR` rather than `AND` when combining user and agent scope.
 EOF
 fi
 

@@ -290,6 +290,7 @@ const memoryPlugin = definePluginEntry({
         user_id: userIdOverride || _effectiveUserId(sessionKey),
         top_k: limit ?? cfg.topK,
         threshold: recallCfg?.threshold ?? cfg.searchThreshold,
+        rerank: recallCfg?.rerank ?? true,
         source: "OPENCLAW",
       };
       if (runId) opts.run_id = runId;

@@ -54,14 +54,14 @@ describe("mem0ConfigSchema.parse() — defaults", () => {
     expect(cfg.autoRecall).toBe(true);
   });
 
-  it("topK defaults to 5", () => {
+  it("topK defaults to 3", () => {
     const cfg = mem0ConfigSchema.parse({ apiKey: "test-key" });
-    expect(cfg.topK).toBe(5);
+    expect(cfg.topK).toBe(3);
   });
 
-  it("searchThreshold defaults to 0.1", () => {
+  it("searchThreshold defaults to 0.2", () => {
     const cfg = mem0ConfigSchema.parse({ apiKey: "test-key" });
-    expect(cfg.searchThreshold).toBe(0.1);
+    expect(cfg.searchThreshold).toBe(0.2);
   });
 
   it("customInstructions defaults to DEFAULT_CUSTOM_INSTRUCTIONS", () => {

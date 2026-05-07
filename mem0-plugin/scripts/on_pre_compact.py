@@ -17,10 +17,15 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import urllib.request
 import urllib.error
+
+if os.environ.get("CLAUDE_INVOKED_BY") or os.environ.get("MEM0_FLUSH_ACTIVE"):
+    sys.exit(0)
+os.environ["MEM0_FLUSH_ACTIVE"] = "1"
 
 log = logging.getLogger("mem0-capture")
 log.setLevel(logging.DEBUG)
@@ -33,6 +38,14 @@ MAX_TAIL_LINES = 500
 MAX_USER_MESSAGES = 30
 MAX_BASH_COMMANDS = 20
 MAX_ASSISTANT_TEXT = 10000
+
+
+PRIVATE_TAG_RE = re.compile(r"<private>.*?</private>", re.IGNORECASE | re.DOTALL)
+
+
+def strip_private_tags(text: str) -> str:
+    """Remove explicitly private spans before any transcript text is stored."""
+    return PRIVATE_TAG_RE.sub("[private content omitted]", text)
 
 
 def tail_lines(filepath: str, n: int) -> list[str]:
@@ -87,6 +100,7 @@ def parse_transcript(lines: list[str]) -> dict:
                     elif isinstance(block, dict) and block.get("type") == "text":
                         parts.append(block.get("text", ""))
             text = "\n".join(parts).strip()
+            text = strip_private_tags(text)
             if text and len(text) > 10 and not text.startswith("<"):
                 user_messages.append(text)
 
@@ -96,6 +110,7 @@ def parse_transcript(lines: list[str]) -> dict:
                     continue
                 if block.get("type") == "text":
                     text = block.get("text", "").strip()
+                    text = strip_private_tags(text)
                     if text:
                         last_assistant_text = text
                 if block.get("type") == "tool_use":
@@ -108,7 +123,7 @@ def parse_transcript(lines: list[str]) -> dict:
                     elif tool_name == "Bash":
                         cmd = tool_input.get("command", "")
                         if cmd:
-                            bash_commands.append(cmd)
+                            bash_commands.append(strip_private_tags(cmd))
 
     return {
         "user_messages": user_messages[-MAX_USER_MESSAGES:],

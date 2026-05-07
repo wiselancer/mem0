@@ -197,7 +197,7 @@ describe("PlatformBackend", () => {
   });
 
   // -- search() ------------------------------------------------------------
-  it("search() sends POST to /v2/memories/search/", async () => {
+  it("search() sends POST to /v3/memories/search/", async () => {
     const mock = mockFetchResponse(200, [
       { id: "mem-1", score: 0.95, memory: "test" },
     ]);
@@ -208,7 +208,7 @@ describe("PlatformBackend", () => {
 
     expect(mock).toHaveBeenCalledOnce();
     const [url, opts] = (mock as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(url).toBe("https://api.mem0.ai/v2/memories/search/");
+    expect(url).toBe("https://api.mem0.ai/v3/memories/search/");
     expect(opts.method).toBe("POST");
 
     const body = JSON.parse(opts.body);
@@ -217,6 +217,21 @@ describe("PlatformBackend", () => {
     expect(body.threshold).toBe(0.3);
     expect(body.filters).toEqual({ user_id: "u1" });
     expect(results).toEqual([{ id: "mem-1", score: 0.95, memory: "test" }]);
+  });
+
+  it("search() uses OR for user and agent scopes", async () => {
+    const mock = mockFetchResponse(200, []);
+    vi.stubGlobal("fetch", mock);
+
+    const backend = createBackend();
+    await backend.search("find this", { userId: "u1", agentId: "codex" });
+
+    const body = JSON.parse(
+      (mock as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
+    );
+    expect(body.filters).toEqual({
+      OR: [{ user_id: "u1" }, { agent_id: "codex" }],
+    });
   });
 
   it("search() unwraps results from object envelope", async () => {

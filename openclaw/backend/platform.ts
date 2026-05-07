@@ -130,9 +130,18 @@ export class PlatformBackend implements Backend {
       return opts.extraFilters;
     }
 
+    const entityConditions: Record<string, unknown>[] = [];
+    if (opts.userId) entityConditions.push({ user_id: opts.userId });
+    if (opts.agentId) entityConditions.push({ agent_id: opts.agentId });
+
     const andConditions: Record<string, unknown>[] = [];
-    if (opts.userId) andConditions.push({ user_id: opts.userId });
-    if (opts.agentId) andConditions.push({ agent_id: opts.agentId });
+    if (entityConditions.length === 1) {
+      andConditions.push(entityConditions[0]);
+    } else if (entityConditions.length > 1) {
+      // Mem0 stores user_id and agent_id as separate entity scopes. OR keeps
+      // cross-agent recall broad; AND commonly returns empty results.
+      andConditions.push({ OR: entityConditions });
+    }
     if (opts.appId) andConditions.push({ app_id: opts.appId });
     if (opts.runId) andConditions.push({ run_id: opts.runId });
 
@@ -168,7 +177,7 @@ export class PlatformBackend implements Backend {
     if (opts.rerank) payload.rerank = true;
     if (opts.fields) payload.fields = opts.fields;
 
-    const result = (await this._request("POST", "/v2/memories/search/", {
+    const result = (await this._request("POST", "/v3/memories/search/", {
       json: payload,
     })) as unknown;
     if (Array.isArray(result)) return result;
