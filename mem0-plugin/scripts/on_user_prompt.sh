@@ -18,6 +18,11 @@ INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""' 2>/dev/null || echo "")
 CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null || echo "")
 
+if [ -z "${MEM0_API_KEY:-}" ] && [ -r "$HOME/.config/mem0/app_mem0_api_key" ]; then
+  MEM0_API_KEY="$(tr -d '\r\n' < "$HOME/.config/mem0/app_mem0_api_key")"
+  export MEM0_API_KEY
+fi
+
 # Skip trivial prompts — not worth a network call
 MIN_CHARS="${MEM0_SEARCH_MIN_CHARS:-30}"
 if [ ${#PROMPT} -lt "$MIN_CHARS" ]; then
@@ -41,7 +46,7 @@ if [ -z "$API_KEY" ]; then
   exit 0
 fi
 
-USER_ID="${MEM0_USER_ID:-${USER:-default}}"
+USER_ID="${MEM0_USER_ID:-wiselancer}"
 AGENT_ID="${MEM0_AGENT_ID:-codex}"
 TOP_K="${MEM0_SEARCH_TOP_K:-3}"
 THRESHOLD="${MEM0_SEARCH_THRESHOLD:-0.2}"

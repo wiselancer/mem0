@@ -34,6 +34,7 @@ _handler.setFormatter(logging.Formatter("[mem0-capture] %(message)s"))
 log.addHandler(_handler)
 
 HOSTED_API_URL = "https://api.mem0.ai"
+DEFAULT_API_KEY_FILE = os.path.expanduser("~/.config/mem0/app_mem0_api_key")
 MAX_TAIL_LINES = 500
 MAX_USER_MESSAGES = 30
 MAX_BASH_COMMANDS = 20
@@ -46,6 +47,15 @@ PRIVATE_TAG_RE = re.compile(r"<private>.*?</private>", re.IGNORECASE | re.DOTALL
 def strip_private_tags(text: str) -> str:
     """Remove explicitly private spans before any transcript text is stored."""
     return PRIVATE_TAG_RE.sub("[private content omitted]", text)
+
+
+def read_default_api_key() -> str:
+    """Read the local hosted Mem0 key when hooks do not inherit shell env."""
+    try:
+        with open(DEFAULT_API_KEY_FILE, encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return ""
 
 
 def tail_lines(filepath: str, n: int) -> list[str]:
@@ -249,6 +259,8 @@ def main():
     if mem0_backend == "self_hosted":
         self_hosted_api_url = os.environ.get("MEM0_SELF_HOSTED_API_URL") or os.environ.get("MEM0_API_URL", "")
     api_key = os.environ.get("MEM0_SELF_HOSTED_API_KEY" if self_hosted_api_url else "MEM0_API_KEY", "")
+    if not api_key and not self_hosted_api_url:
+        api_key = read_default_api_key()
     if not api_key:
         log.debug("Mem0 API key not set, skipping capture")
         return
@@ -264,7 +276,7 @@ def main():
         log.debug("No transcript_path provided")
         return
 
-    user_id = os.environ.get("MEM0_USER_ID", os.environ.get("USER", "default"))
+    user_id = os.environ.get("MEM0_USER_ID", "wiselancer")
     store_memory.run_id = derive_run_id(hook_input)
 
     lines = tail_lines(transcript_path, MAX_TAIL_LINES)
