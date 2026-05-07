@@ -4,6 +4,15 @@ declare module "openclaw/plugin-sdk" {
     type: "memory" | "dream" | "digest" | "entity";
     title: string;
     content: string;
+    kind?: "memory-root" | "daily-note" | "dream-report" | "event-log" | string;
+    contentType?: string;
+    workspaceDir?: string;
+    relativePath?: string;
+    absolutePath?: string;
+    agentIds?: string[];
+    userIds?: string[];
+    sourceIds?: string[];
+    tags?: string[];
     metadata?: Record<string, unknown>;
     createdAt?: string;
     updatedAt?: string;
