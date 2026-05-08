@@ -34,11 +34,12 @@ export function createPublicArtifactsProvider(ctx: PublicArtifactsContext) {
       const artifacts: MemoryArtifact[] = [];
 
       try {
-        if (!ctx.stateDir) {
+        const stateDir = ctx.stateDir ?? process.env.OPENCLAW_STATE_DIR;
+        if (!stateDir) {
           return artifacts;
         }
 
-        const publicDir = path.join(ctx.stateDir, "mem0-public-artifacts");
+        const publicDir = path.join(stateDir, "mem0-public-artifacts");
         await mkdir(publicDir, { recursive: true });
 
         // Memory artifacts
@@ -60,7 +61,7 @@ export function createPublicArtifactsProvider(ctx: PublicArtifactsContext) {
         if (types.includes("dream") && ctx.cfg.skills?.dream?.enabled) {
           const dreamArtifact = await writeDreamArtifact({
             publicDir,
-            stateDir: ctx.stateDir,
+            stateDir,
             userId,
           });
           if (dreamArtifact) {
